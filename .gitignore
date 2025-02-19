@@ -1,3 +1,5 @@
 2-bluetooth-ping
-./1-sound-analyzer/audio-speaker-407/FreeRTOS-Kernel
-./1-sound-analyzer/audio-listener-446/FreeRTOS-Kernel
+/1-sound-analyzer/audio-speaker-407/FreeRTOS-Kernel
+/1-sound-analyzer/audio-listener-446/FreeRTOS-Kernel
+*.o
+*.elf
