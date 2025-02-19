@@ -1,0 +1,52 @@
+CC=arm-none-eabi-gcc
+MACH=cortex-m4
+FILENAME = filename
+
+SOURCE_FILES = FreeRTOS/
+INC_HEADERS = FreeRTOS/include/
+PORT_FILES = FreeRTOS/portable/GCC/ARM_CM4F/
+HEAP_FILE = FreeRTOS/portable/MemMang/
+COMPILATION_FILES = inc/comp_files/
+LOW_LEVEL_FILES = inc/low_level/
+LOGIC_FILES = inc/logic/
+
+#If Using: Add to FILE_LINKS 
+LOW_LEVEL = $(LOW_LEVEL_FILES)file1.o $(LOW_LEVEL_FILES)file2.o 
+#If Using: Add to FILE_LINKS 
+LOGIC = $(LOGIC_FILES)file1.o $(LOGIC_FILES)file2.o 
+#If Using: Add to FILE_LINKS 
+COMPILATION = $(COMPILATION_FILES)startup.o $(COMPILATION_FILES)syscalls.o
+
+FILE_LINKS = $(COMPILATION) $() $() 
+
+RTOS_KERNEL_L1 = $(SOURCE_FILES)croutine.o $(SOURCE_FILES)event_groups.o $(SOURCE_FILES)list.o
+RTOS_KERNEL_L2 = $(SOURCE_FILES)queue.o $(SOURCE_FILES)stream_buffer.o $(SOURCE_FILES)tasks.o $(SOURCE_FILES)systemclock.o 
+RTOS_KERNEL_L3 = $(SOURCE_FILES)timers.o $(PORT_FILES)port.o $(HEAP_FILE)heap_4.o 
+RTOS_KERNEL_LINKS = $(RTOS_KERNEL_L1) $(RTOS_KERNEL_L2) $(RTOS_KERNEL_L3)
+MY_INCLUDES = -I$(COMPILATION_FILES) -I$(LOW_LEVEL_FILES) -I$(LOGIC_FILES)
+
+CFLAGS= -c -mcpu=$(MACH) -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -g -std=gnu11 -Wall -I$(INC_HEADERS) -I$(PORT_FILES) -I$(HEAP_FILE) -I$(SOURCE_FILES) -I$(MY_INCLUDES)
+LDFLAGS= -mcpu=$(MACH) -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=nano.specs -T $(COMPILATION_FILES)stm32f407_ls.ld -Wl,-Map=final.map
+
+all: final.elf
+
+%.o: %.c
+	$(CC) $(CFLAGS) $^ -o $@
+	
+%.o: $(SOURCE_FILES)%.c
+	$(CC) $(CFLAGS) $^ -o $@
+	
+%.o: $(PORT_FILES)%.c
+	$(CC) $(CFLAGS) $^ -o $@
+	
+%.o: $(HEAP_FILE)%.c
+	$(CC) $(CFLAGS) $^ -o $@
+
+final.elf: $(FILENAME).o $(RTOS_KERNEL_LINKS) $(FILE_LINKS)
+	$(CC) $(LDFLAGS) $^ -o $@
+
+clean:
+	rm -rf *.o *.elf *.map $(SOURCE_FILES)*.o $(PORT_FILES)*.o $(HEAP_FILE)*.o
+
+load:
+	openocd -f board/stm32f4discovery.cfg

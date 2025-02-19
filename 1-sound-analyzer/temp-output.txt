@@ -1,0 +1,148 @@
+Info : device id = 0x10006421
+Info : flash size = 512 KiB
+Info : flash size = 512 bytes
+Warn : Prefer GDB command "target extended-remote :3333" instead of "target remote :3333"
+Info : Unable to match requested speed 2000 kHz, using 1800 kHz
+Info : Unable to match requested speed 2000 kHz, using 1800 kHz
+[stm32f4x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08004502 msp: 0x20020000
+Info : Unable to match requested speed 8000 kHz, using 4000 kHz
+Info : Unable to match requested speed 8000 kHz, using 4000 kHz
+Info : Unable to match requested speed 2000 kHz, using 1800 kHz
+Info : Unable to match requested speed 2000 kHz, using 1800 kHz
+[stm32f4x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08004502 msp: 0x20020000
+Info : Unable to match requested speed 2000 kHz, using 1800 kHz
+Info : Unable to match requested speed 2000 kHz, using 1800 kHz
+[stm32f4x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08004502 msp: 0x20020000
+Info : Unable to match requested speed 8000 kHz, using 4000 kHz
+Info : Unable to match requested speed 8000 kHz, using 4000 kHz
+Info : halted: PC: 0x08004242
+Info : halted: PC: 0x08004244
+Info : halted: PC: 0x08004246
+Info : halted: PC: 0x08004248
+Info : halted: PC: 0x0800424a
+Info : halted: PC: 0x0800424c
+Info : halted: PC: 0x0800424e
+Info : halted: PC: 0x08004250
+Info : halted: PC: 0x080002f8
+Error: jtag status contains invalid mode value - communication failure
+Warn : target stm32f4x.cpu is not halted (gdb fileio)
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 100ms
+Info : Previous state query failed, trying to reconnect
+Error: jtag status contains invalid mode value - communication failure
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 300ms
+Info : Previous state query failed, trying to reconnect
+Polling target stm32f4x.cpu failed, trying to reexamine
+Info : [stm32f4x.cpu] Cortex-M4 r0p1 processor detected
+Info : [stm32f4x.cpu] target has 6 breakpoints, 4 watchpoints
+Error: jtag status contains invalid mode value - communication failure
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 100ms
+Info : Previous state query failed, trying to reconnect
+Error: jtag status contains invalid mode value - communication failure
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 300ms
+Info : Previous state query failed, trying to reconnect
+Polling target stm32f4x.cpu failed, trying to reexamine
+Info : [stm32f4x.cpu] Cortex-M4 r0p1 processor detected
+Info : [stm32f4x.cpu] target has 6 breakpoints, 4 watchpoints
+Error: jtag status contains invalid mode value - communication failure
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 100ms
+Info : Previous state query failed, trying to reconnect
+Error: jtag status contains invalid mode value - communication failure
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 300ms
+Info : Previous state query failed, trying to reconnect
+Polling target stm32f4x.cpu failed, trying to reexamine
+Info : [stm32f4x.cpu] Cortex-M4 r0p1 processor detected
+Info : [stm32f4x.cpu] target has 6 breakpoints, 4 watchpoints
+Error: jtag status contains invalid mode value - communication failure
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 100ms
+Info : Previous state query failed, trying to reconnect
+Error: jtag status contains invalid mode value - communication failure
+Polling target stm32f4x.cpu failed, trying to reexamine
+Examination failed, GDB will be halted. Polling again in 300ms
+Info : Previous state query failed, trying to reconnect
+Polling target stm32f4x.cpu failed, trying to reexamine
+Info : [stm32f4x.cpu] Cortex-M4 r0p1 processor detected
+Info : [stm32f4x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : dropped 'gdb' connection
+^Cshutdown command invoked
+make: *** [Makefile:52: load] Interrupt
+
+
+
+
+
+
+
+
+(gdb) load
+Loading section .text, size 0xa284 lma 0x8000000
+Loading section .init, size 0xc lma 0x800a284
+Loading section .fini, size 0xc lma 0x800a290
+Loading section .eh_frame, size 0x4 lma 0x800a29c
+Loading section .ARM.exidx, size 0x8 lma 0x800a2a0
+Loading section .data, size 0x204 lma 0x800a2a8
+Loading section .init_array, size 0x4 lma 0x800a4ac
+Loading section .fini_array, size 0x4 lma 0x800a4b0
+Start address 0x08004502, load size 42164
+Transfer rate: 23 KB/sec, 4216 bytes/write.
+(gdb) monitor reset init
+Unable to match requested speed 2000 kHz, using 1800 kHz
+Unable to match requested speed 2000 kHz, using 1800 kHz
+[stm32f4x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08004502 msp: 0x20020000
+Unable to match requested speed 8000 kHz, using 4000 kHz
+Unable to match requested speed 8000 kHz, using 4000 kHz
+(gdb) b tasks.c : 106
+Breakpoint 1 at 0x8004240: file tasks.c, line 106.
+Note: automatically using hardware breakpoints for read-only addresses.
+(gdb) b tasks.c : 47
+Breakpoint 2 at 0x80040dc: file tasks.c, line 47.
+(gdb) b tasks.c : 61
+Breakpoint 3 at 0x800412c: file tasks.c, line 61.
+(gdb) b tasks.c : 78
+Breakpoint 4 at 0x8004164: file tasks.c, line 78.
+(gdb) c
+Continuing.
+
+Breakpoint 1, start_tasks () at tasks.c:106
+106	    xTaskCreate(vCANTransmitTask, "CAN Transmit Task", 128, NULL, 3, &can_transmit_handle);
+(gdb) n
+halted: PC: 0x08004242
+halted: PC: 0x08004244
+halted: PC: 0x08004246
+halted: PC: 0x08004248
+halted: PC: 0x0800424a
+halted: PC: 0x0800424c
+halted: PC: 0x0800424e
+halted: PC: 0x08004250
+halted: PC: 0x080002f8
+108	    vTaskStartScheduler();
+(gdb) c
+Continuing.
+jtag status contains invalid mode value - communication failure
+
+Program stopped.
+start_tasks () at tasks.c:108
+108	    vTaskStartScheduler();
+(gdb) q
+A debugging session is active.
+
+	Inferior 1 [Remote target] will be detached.
+
+Quit anyway? (y or n) y
+
+
+
+
+
+
+
