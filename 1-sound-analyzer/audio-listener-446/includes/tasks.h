@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <FreeRTOS.h>
 #include <task.h>
 #include <event_groups.h>
@@ -26,6 +27,7 @@
 #define EXTI_NUM 11
 #define EXTI_PORT 'A'
 #define EVENT_BIT0 (1 << 0)
+#define NUM_OF_CONVERSIONS 512 // 1Kbyte of converted sound data
 
 void start_tasks();
 

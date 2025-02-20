@@ -15,7 +15,7 @@ frequencyBin_data* fourier_transform(float *sample_values, int const samples_per
     frequency_bins->nyquist_magnitude = calloc((samples_per_sec / 2), sizeof(float));
     frequency_bins->phase = calloc((samples_per_sec / 2), sizeof(float));
 
-    for (int k = 0; k < samples_per_sec / 2; k++) { //Keeping Number of Frequency bins calculated under the Nyquist Limit
+    for (int k = 0; k < samples_per_sec / 2; k++) { // Keeping Number of Frequency bins calculated under the Nyquist Limit
         
         for (int n = 0; n < samples_per_sec; n++) {
 

@@ -49,7 +49,7 @@ void CAN_SetAcceptanceFilter(uint8_t canNum, Filter *filterInfo) {
 	CANMailFilters->FilterActivationReg.enable_Filter0 = 1;
 }
 
-void CAN_SetTXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t numOfBytes) {
+void CAN_SetTXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t data_len) {
 	
 	MAIL_FILTERSx *const CANMailFilters = Get_MailBoxANDFilters(canNum);
 	
@@ -61,27 +61,27 @@ void CAN_SetTXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, u
 	}
 	
 	
-	if (numOfBytes < 0 || numOfBytes > 8) numOfBytes = 0; 
+	if (data_len < 0 || data_len > 8) data_len = 0; 
 	
 	switch (mailboxNum) {
 
 		case 0:
 			CANMailFilters->TXMailBox0IDReg.StandardIdentifier.rw_StandardIdentifier = standardID;
-			CANMailFilters->TXMailBox0DataLenCtrlTimeStampReg.rw_DataLen_InBytes = numOfBytes;
+			CANMailFilters->TXMailBox0DataLenCtrlTimeStampReg.rw_DataLen_InBytes = data_len;
 			break;
 		case 1:
 			CANMailFilters->TXMailBox1IDReg.StandardIdentifier.rw_StandardIdentifier = standardID;
-			CANMailFilters->TXMailBox1DataLenCtrlTimeStampReg.rw_DataLen_InBytes = numOfBytes;
+			CANMailFilters->TXMailBox1DataLenCtrlTimeStampReg.rw_DataLen_InBytes = data_len;
 			break;
 		case 2:
 			CANMailFilters->TXMailBox2IDReg.StandardIdentifier.rw_StandardIdentifier = standardID;
-			CANMailFilters->TXMailBox2DataLenCtrlTimeStampReg.rw_DataLen_InBytes = numOfBytes;
+			CANMailFilters->TXMailBox2DataLenCtrlTimeStampReg.rw_DataLen_InBytes = data_len;
 			break;
 	}
 	
 }
 
-void CAN_SetRXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t numOfBytes) {
+void CAN_SetRXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t data_len) {
 	
 	MAIL_FILTERSx *const CANMailFilters = Get_MailBoxANDFilters(canNum);
 	
@@ -93,17 +93,17 @@ void CAN_SetRXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, u
 	}
 	
 	
-	if (numOfBytes < 0 || numOfBytes > 8) numOfBytes = 0; 
+	if (data_len < 0 || data_len > 8) data_len = 0; 
 	
 	switch (mailboxNum) {
 
 		case 0:
 			CANMailFilters->RXMailBox0IDReg.StandardIdentifier.read_StandardIdentifier = standardID;
-			CANMailFilters->RXMailBox0DataLenCtrlTimeStampReg.read_DataLen_InBytes = numOfBytes;
+			CANMailFilters->RXMailBox0DataLenCtrlTimeStampReg.read_DataLen_InBytes = data_len;
 			break;
 		case 1:
 			CANMailFilters->RXMailBox1IDReg.StandardIdentifier.read_StandardIdentifier = standardID;
-			CANMailFilters->RXMailBox1DataLenCtrlTimeStampReg.read_DataLen_InBytes = numOfBytes;
+			CANMailFilters->RXMailBox1DataLenCtrlTimeStampReg.read_DataLen_InBytes = data_len;
 			break;
 	}
 }
@@ -126,45 +126,56 @@ void CAN_Init_and_Start(uint8_t canNum, char port, uint8_t pinNums[]) {
 	while (CAN->MasterStatusReg.initializeModeRequestAccepted == 1); // Syncing to CAN Bus (Waiting for 11 Recessive Bits)
 }
 
-int8_t CAN_Transmit(uint8_t canNum, uint8_t mailboxNum, uint8_t *dataBuffer, uint8_t numOfBytes) {
+int8_t CAN_Transmit(uint8_t canNum, uint8_t mailboxNum, uint8_t *dataBuffer) {
 
 	CANx *const CAN = Get_CAN(canNum);
 	MAIL_FILTERSx *const CANMailFilters = Get_MailBoxANDFilters(canNum);
-	
-	if (numOfBytes > 8) { numOfBytes = 8; }
+	uint8_t data_len = 0;
 
-	if (numOfBytes > 0) {
-		
-		if (mailboxNum == 0) {
-		
-			CANMailFilters->TXMailBox0DataLowReg.data = *((uint32_t*)dataBuffer);
+	// Get Data Length
+	switch (mailboxNum) {
 
-			if (numOfBytes > 4) {
-				uint32_t* high_word = ((uint32_t*)dataBuffer);
-				CANMailFilters->TXMailBox0DataHighReg.data = *++high_word;
-			}
-		}
-
-		else if (mailboxNum == 1) {
-			CANMailFilters->TXMailBox1DataLowReg.data = *((uint32_t*)dataBuffer);
-
-			if (numOfBytes > 4) {
-				uint32_t* high_word = ((uint32_t*)dataBuffer);
-				CANMailFilters->TXMailBox1DataHighReg.data = *++high_word;
-			}
-		}
-
-		else if (mailboxNum == 2) {
-			CANMailFilters->TXMailBox2DataLowReg.data = *((uint32_t*)dataBuffer);
-
-			if (numOfBytes > 4) {
-				uint32_t* high_word = ((uint32_t*)dataBuffer);
-				CANMailFilters->TXMailBox2DataHighReg.data = *++high_word;
-			}
-		}
-
-		else { return -4; }
+		case 0:
+			data_len = CANMailFilters->TXMailBox0DataLenCtrlTimeStampReg.rw_DataLen_InBytes;
+			break;
+		case 1:
+			data_len = CANMailFilters->TXMailBox1DataLenCtrlTimeStampReg.rw_DataLen_InBytes;
+			break;
+		case 2:
+			data_len = CANMailFilters->TXMailBox2DataLenCtrlTimeStampReg.rw_DataLen_InBytes;
+			break;
 	}
+
+	// Load Transmit Buffer
+	if (data_len > 0 && mailboxNum == 0) {
+		
+		CANMailFilters->TXMailBox0DataLowReg.data = *((uint32_t*)dataBuffer);
+
+		if (data_len > 4) {
+			uint32_t* high_word = ((uint32_t*)dataBuffer);
+			CANMailFilters->TXMailBox0DataHighReg.data = *++high_word;
+		}
+	}
+
+	else if (data_len > 0 && mailboxNum == 1) {
+		CANMailFilters->TXMailBox1DataLowReg.data = *((uint32_t*)dataBuffer);
+
+		if (data_len > 4) {
+			uint32_t* high_word = ((uint32_t*)dataBuffer);
+			CANMailFilters->TXMailBox1DataHighReg.data = *++high_word;
+		}
+	}
+
+	else if (data_len > 0 && mailboxNum == 2) {
+		CANMailFilters->TXMailBox2DataLowReg.data = *((uint32_t*)dataBuffer);
+
+		if (data_len > 4) {
+			uint32_t* high_word = ((uint32_t*)dataBuffer);
+			CANMailFilters->TXMailBox2DataHighReg.data = *++high_word;
+		}
+	}
+
+	else { return -4; }
 	
 	switch (mailboxNum) {
 
@@ -184,11 +195,11 @@ int8_t CAN_Transmit(uint8_t canNum, uint8_t mailboxNum, uint8_t *dataBuffer, uin
 	if (CAN->TransmitStatReg.mailbox0_TransmitError) { return -2; }
 	if (CAN->TransmitStatReg.mailbox0_NoTransmitRequestPending) { return -3; }
 	
-	return CAN->TransmitStatReg.mailbox0_TransmitSuccess;
+	return CAN->TransmitStatReg.mailbox0_TransmitSuccess | CAN->TransmitStatReg.mailbox0_RequestCompleted;
 }
 
 
-Received_Data* CAN_Receive(uint8_t canNum, uint8_t mailboxNum, uint8_t numOfBytes) {
+Received_Data* CAN_Receive(uint8_t canNum, uint8_t mailboxNum) {
 
 	CANx *const CAN = Get_CAN(canNum);
 	MAIL_FILTERSx *const CANMailFilters = Get_MailBoxANDFilters(canNum);
@@ -197,34 +208,48 @@ Received_Data* CAN_Receive(uint8_t canNum, uint8_t mailboxNum, uint8_t numOfByte
 	//uint8_t id = rxMailboxID->StandardIdentifier.read_StandardIdentifier;
 	//uint8_t len = txDataCtrlTimeStamp->read_DataLen_InBytes
 
-	if (numOfBytes > 0) {
-		if (mailboxNum == 0) {
-			for (int i = 0; i < numOfBytes; i++) {
-				
-				if (i > 3) {
-					R_Data->dataIterator[i] = CANMailFilters->RXMailBox0DataHighReg.dataIterator[i - 4];
-				}
-				else {
-					R_Data->dataIterator[i] = CANMailFilters->RXMailBox0DataLowReg.dataIterator[i];
-				}
-			}
+	uint8_t data_len = 0;
 
-			CAN->RXFIFO0Reg.release_FIFO0_OutputMailbox = 1;
-		}
-		else if (mailboxNum == 1) {
-			for (int i = 0; i < numOfBytes; i++) {
-				
-				if (i > 3) {
-					R_Data->dataIterator[i] = CANMailFilters->RXMailBox1DataHighReg.dataIterator[i - 4];
-				}
-				else {
-					R_Data->dataIterator[i] = CANMailFilters->RXMailBox1DataLowReg.dataIterator[i];
-				}
-			}
-			CAN->RXFIFO1Reg.release_FIFO1_OutputMailbox = 1;
-		}
-		else { return ((void*)0); }
+	// Get Data Length
+	switch (mailboxNum) {
+
+		case 0:
+			data_len = CANMailFilters->TXMailBox0DataLenCtrlTimeStampReg.rw_DataLen_InBytes;
+			break;
+		case 1:
+			data_len = CANMailFilters->TXMailBox1DataLenCtrlTimeStampReg.rw_DataLen_InBytes;
+			break;
+		case 2:
+			data_len = CANMailFilters->TXMailBox2DataLenCtrlTimeStampReg.rw_DataLen_InBytes;
+			break;
 	}
+
+	if (data_len > 0 && mailboxNum == 0) {
+		for (int i = 0; i < data_len; i++) {
+			
+			if (i > 3) {
+				R_Data->dataIterator[i] = CANMailFilters->RXMailBox0DataHighReg.dataIterator[i - 4];
+			}
+			else {
+				R_Data->dataIterator[i] = CANMailFilters->RXMailBox0DataLowReg.dataIterator[i];
+			}
+		}
+
+		CAN->RXFIFO0Reg.release_FIFO0_OutputMailbox = 1;
+	}
+	else if (data_len > 0 && mailboxNum == 1) {
+		for (int i = 0; i < data_len; i++) {
+			
+			if (i > 3) {
+				R_Data->dataIterator[i] = CANMailFilters->RXMailBox1DataHighReg.dataIterator[i - 4];
+			}
+			else {
+				R_Data->dataIterator[i] = CANMailFilters->RXMailBox1DataLowReg.dataIterator[i];
+			}
+		}
+		CAN->RXFIFO1Reg.release_FIFO1_OutputMailbox = 1;
+	}
+	else { return ((void*)0); }
 	return R_Data;
 }
 

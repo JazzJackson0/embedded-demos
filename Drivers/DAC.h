@@ -67,9 +67,9 @@ void DAC_Init(uint8_t dacNum);
  * 
  * @param dacNum DAC Channel Number.  (1 - 2)
  * @param digitalData Digital data to be converted to analog output data.
- * @return ** int16_t 
+ * @return ** uint16_t 
  */
-int16_t DAC_Out(uint8_t dacNum, int16_t digitalData);
+uint16_t DAC_Out(uint8_t dacNum, uint16_t digitalData);
 
 /**
  * @brief Return the decibel value of a given analog output.

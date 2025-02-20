@@ -87,20 +87,20 @@ void CAN_SetAcceptanceFilter(uint8_t canNum, Filter *filterInfo);
  * @param canNum CAN Number (1 - 2)
  * @param mailboxNum Mailbox Number (0 - 2)
  * @param standardID Mailbox Acceptance Filter ID
- * @param numOfBytes Mailbox Data Transmission Size (0 Bytes - 8 Bytes)
+ * @param data_len Mailbox Data Transmission Size (0 Bytes - 8 Bytes)
  * @return ** void 
  */
-void CAN_SetTXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t numOfBytes);
+void CAN_SetTXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t data_len);
 /**
  * @brief Set Up CAN RX Mailbox
  * 
  * @param canNum CAN Number (1 - 2)
  * @param mailboxNum Mailbox Number (0 - 2)
  * @param standardID Mailbox Acceptance Filter ID
- * @param numOfBytes Mailbox Data Reception Size (0 Bytes - 8 Bytes)
+ * @param data_len Mailbox Data Reception Size (0 Bytes - 8 Bytes)
  * @return ** void 
  */
-void CAN_SetRXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t numOfBytes);
+void CAN_SetRXMailbox(uint8_t canNum, uint8_t mailboxNum, uint64_t standardID, uint8_t data_len);
 /**
  * @brief Initialize and Start CAN
  * 
@@ -116,19 +116,17 @@ void CAN_Init_and_Start(uint8_t canNum, char port, uint8_t pinNums[]);
  * @param canNum CAN Number (1 - 2)
  * @param mailboxNum Mailbox Number (0 - 2)
  * @param dataBuffer Data to transmit
- * @param numOfBytes Number of Bytes to Transmit
  * @return ** int8_t 
  */
-int8_t CAN_Transmit(uint8_t canNum, uint8_t mailboxNum, uint8_t *dataBuffer, uint8_t numOfBytes);
+int8_t CAN_Transmit(uint8_t canNum, uint8_t mailboxNum, uint8_t *dataBuffer);
 /**
  * @brief Receive Data via CAN
  * 
  * @param canNum CAN Number (1 - 2)
  * @param mailboxNum Mailbox Number (0 - 2)
- * @param numOfBytes Number of Bytes to Receive
  * @return ** Received_Data* 
  */
-Received_Data* CAN_Receive(uint8_t canNum, uint8_t mailboxNum, uint8_t numOfBytes);
+Received_Data* CAN_Receive(uint8_t canNum, uint8_t mailboxNum);
 /**
  * @brief Enable selected CAN interrupts
  * 

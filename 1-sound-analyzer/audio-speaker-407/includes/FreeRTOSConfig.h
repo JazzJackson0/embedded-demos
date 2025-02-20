@@ -47,6 +47,7 @@
  * @brief The NUMERICALLY highest priority an interrupt can have if it calls FreeRTOS API functions.
  *      FreeRTOS disables interrupts that are above this level when critical sections are executed.
  *      This prevents high-priority interrupts from interfering with the FreeRTOS scheduler.
+ * (i.e. If this is set to 5, Only NVIC priorities 0 - 5 are valid)
  * 
  */
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5

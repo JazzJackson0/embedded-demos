@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <FreeRTOS.h>
 #include <task.h>
-#include "../../../Drivers/ADC.h"
+#include "../../../Drivers/DAC.h"
 #include "../../../Drivers/CAN.h"
 #include "../../../Drivers/GPIO.h"
 #include "../../../Drivers/ExternalInterrupt.h"
@@ -19,8 +19,11 @@
 #define CAN_NUM 1
 #define MAILBOX_NUM 0
 #define CAN_GPIO_PORT 'B'
-
-
+#define VOLT_LOW 0.0
+#define VOLT_HIGH 3.3
+#define BYTE_LOW 0
+#define BYT_HIGH 4095
+#define SAMPLE_SIZE 512
 void start_tasks();
 
 

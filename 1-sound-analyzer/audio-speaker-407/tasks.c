@@ -1,12 +1,15 @@
 #include "includes/tasks.h"
 
+static float unit_conversion(int input_high, int input_low, int output_high, int output_low, uint16_t input_value);
+
 uint8_t can_pinNums[] = {8, 9};
 TaskHandle_t can_receive_handle;
 TaskHandle_t freq_analysis_handle;
 TaskHandle_t dac_out_handle;  
 
 
-volatile int16_t data_out;
+volatile uint16_t data_out[SAMPLE_SIZE];
+volatile int current = 0;
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     printf("You have a stack overflow! Congratulations!!\n");
@@ -35,35 +38,73 @@ void CAN1_RX0_IRQHandler(void) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
+
 void vCANReceiveTask(void *pvParameters) {
 
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    while (1) {
 
-    // CAN Receive------------------------------------------
-    Received_Data *data = CAN_Receive(CAN_NUM, MAILBOX_NUM, 2);
-    if (data != NULL) {
-        data_out = ((int16_t) data->byte0) << 8 | (int16_t) data->byte1;
-        free(data);
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        // CAN Receive------------------------------------------
+        Received_Data *data = CAN_Receive(CAN_NUM, MAILBOX_NUM);
+        if (data != NULL) {
+
+            if (current > 508) { current = 0; }
+            data_out[current++] = ((uint16_t) data->byte0) << 8 | (uint16_t) data->byte1;
+            data_out[current++] = ((uint16_t) data->byte2) << 8 | (uint16_t) data->byte3;
+            data_out[current++] = ((uint16_t) data->byte4) << 8 | (uint16_t) data->byte5;
+            data_out[current++] = ((uint16_t) data->byte6) << 8 | (uint16_t) data->byte7;
+
+            free(data);
+        }
+
+        if (current == 512) {
+            xTaskNotifyGive(dac_out_handle);
+        }
     }
-}
-
-
-void vFrequencyAnalysisTask(void *pvParameters) {
-
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
 
 void vDACOutTask(void *pvParameters) {
     
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-    // DAC Out-----------------------------------------------
-    DAC_Out(DAC_NUM, data_out);
-    // Decibel_Out();
+    while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        // DAC Out-----------------------------------------------
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
+            uint16_t result = DAC_Out(DAC_NUM, data_out[i]);
+            int x = 1 + 1; // Temporary BS
+            // printf("%d\n", result);
+        }
+    }
+}    
+
+
+
+void vFrequencyAnalysisTask(void *pvParameters) {
+
+
+    while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        float samples[SAMPLE_SIZE];
+
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
+            samples[i] = unit_conversion(BYT_HIGH, BYTE_LOW, VOLT_HIGH, VOLT_LOW, data_out[i]);
+        }
+        // samples per sec = f_clk / 84 cycles per adc conversion
+        frequencyBin_data* frequencies = fourier_transform(samples, (int)190476.1905);
+    }
+    
 }
 
 
 void start_tasks() {
+
+    // Test
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+        data_out[i] = 500 + (i * 7);
+    }
 
     // Initialize DAC------------------------------------
     DAC_Init(DAC_NUM);
@@ -87,12 +128,20 @@ void start_tasks() {
 
     // Initialize Tasks----------------------------------
     xTaskCreate(vCANReceiveTask, "CAN Receive Task", 128, NULL, 4, &can_receive_handle);
-    xTaskCreate(vFrequencyAnalysisTask, "Frequencey Analysis Task", 128, NULL, 3, &freq_analysis_handle);
+    // xTaskCreate(vFrequencyAnalysisTask, "Frequencey Analysis Task", 128, NULL, 3, &freq_analysis_handle);
     xTaskCreate(vDACOutTask, "DAC Out Task", 128, NULL, 2, &dac_out_handle);
 
     vTaskStartScheduler();
 }
 
+
+static float unit_conversion(int input_high, int input_low, int output_high, int output_low, uint16_t input_value) {
+
+    float slope = (output_high - output_low) / (input_high - input_low);
+    float intercept = slope * input_low - output_low;
+
+    return (slope * (float) input_value) + intercept;
+}
 
 
 
